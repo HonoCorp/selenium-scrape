@@ -22,7 +22,7 @@ def build_links(driver, url, target_css_selector, next_button_id='ppdPk-Ej1Yeb-L
                 links.append(elem.get_attribute('href'))
             # wait until the transparent overlay is invisible
             wait.until(EC.invisibility_of_element((By.CLASS_NAME, overlay_class)))
-            # wait until the next button is clickable
+            # wait until the next button is clickable, then click it
             wait.until(EC.element_to_be_clickable((By.ID, next_button_id))).click()
     except TimeoutException as e:
         print('Finished scraping...')
@@ -30,7 +30,12 @@ def build_links(driver, url, target_css_selector, next_button_id='ppdPk-Ej1Yeb-L
         print(f'An exception was raised while scraping. {e}')
 
 def write_links_to_file(filename='links.txt', dirname=None, use_datetime=True):
-    '''Writes the list of links to file'''
+    '''Writes the list of links to the specified filename.
+
+    dirname argument allows for the use of a different directory.
+    use_datetime argument controls whether datetime information is added to filename.
+
+    Returns the path to the file that was written.'''
     global links
     # write to the current working directory, by default
     file_name = os.path.join(os.getcwd(), filename)
@@ -38,8 +43,8 @@ def write_links_to_file(filename='links.txt', dirname=None, use_datetime=True):
     if dirname != None and os.path.exists(dirname) and os.path.isdir(dirname):
         file_name = os.path.join(dirname, filename)
     # append datetime to the filename, if use_datetime
-    if use_datetime:        
-        timestring = datetime.date.today().strftime("%Y%m%d%H%M%S")
+    if use_datetime:
+        timestring = f'{datetime.datetime.now().strftime("%Y%m%d%H%M%S")}'
         file_name = f'{os.path.splitext(file_name)[0]}-{timestring}{os.path.splitext(file_name)[1]}'
     # open file in write mode
     with open(file_name, 'w') as f:
