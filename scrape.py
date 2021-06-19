@@ -40,7 +40,7 @@ def write_links_to_file(filename='links.txt', dirname=None, use_datetime=True):
     # append datetime to the filename, if use_datetime
     if use_datetime:        
         timestring = datetime.date.today().strftime("%Y%m%d%H%M%S")
-        file_name = f'{os.path.splitext(file_name)[0]}-{timestring}.{os.path.splitext(file_name)[1]}'
+        file_name = f'{os.path.splitext(file_name)[0]}-{timestring}{os.path.splitext(file_name)[1]}'
     # open file in write mode
     with open(file_name, 'w') as f:
         for link in links:
