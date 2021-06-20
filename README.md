@@ -23,3 +23,13 @@ python app.py -l mombasa -o mombasa-hotels.txt hotel
 ```shell
 python app.py -l nairobi -o nairobi-companies.txt company
 ```
+
+3. Process output file after generating links for all companies in Nairobi  
+```shell  
+python app.py -o nairobi-companies.txt -p company
+```  
+
+4. Process given file  
+```shell  
+python process.py filename.txt
+```

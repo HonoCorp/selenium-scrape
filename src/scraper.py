@@ -6,6 +6,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import os
 import datetime
+import csv
 
 class SeleniumScraper:
     _target_css_selector = '.widget-pane-content-holder .section-layout.section-scrollbox.cYB2Ge-oHo7ed.cYB2Ge-ti6hGc.siAUzd-neVct-Q3DXx-BvBYQ .V0h1Ob-haAclf > a'
@@ -103,7 +104,7 @@ class SeleniumScraper:
     def default_filename(self, filename):
         self._default_filename = filename
 
-    def scrape(self, search_term, filename=None, dirname=None, spatialize=True) -> str:
+    def scrape(self, search_term, filename=None, dirname=None, spatialize=True, process_output=False) -> str:
         '''
         Using a context manager to run the selenium webdriver ensures better use of memory
         and other system resources. The with keyword allows us to easy use a context manager
@@ -128,6 +129,10 @@ class SeleniumScraper:
             # write the list of links to a file
             filename = filename or self.default_filename
             written_file = self._write_links_to_file(filename=filename, dirname=dirname, spatialize=spatialize)
+            if process_output:
+                driver.quit()
+                self.process_file(written_file, overwrite_output_file=True)
+                return f'Scraped links processed and written to the file at {written_file}'
             return f'Scraped links written to the file at {written_file}'
 
     def _build_links(self, driver, search_term):
@@ -182,25 +187,72 @@ class SeleniumScraper:
         # returns the link to the file that was written
         return file_name
 
-    def _process_link(self, link):
+    def process_file(self, filename, overwrite_output_file=False):
+        '''Processes the links in filename and optionally overwrites
+        the existing output file.
+        '''
+        if not os.path.isfile(filename):
+            raise FileNotFoundError(f'{filename} does not exist')
+
+        fileparts = os.path.splitext(filename)
+        if(os.path.isfile(f'{fileparts[0]}.csv')) and not overwrite_output_file:
+            raise FileExistsError(f'{filename} exists already. Use overwrite_output_file option to overwrite it.')
+
+        output_filename = f'{fileparts[0]}.csv' 
+        
+        with open(filename, 'r') as f:
+            with open(output_filename, 'w') as w:
+                fields = ["name", "description", "industry", "rating", "reviews", "address", "website", "phone", "plus_code"]
+                csv_writer = csv.DictWriter(w, fieldnames=fields, delimiter=',')
+                csv_writer.writeheader()
+                for line in f:
+                    data = self._process_link(line.strip())
+                    csv_writer.writerow(data)
+
+    def _process_link(self, link) -> dict:
         '''Processes link
 
-        Scrapes available information from the link:
+        Scrapes the following information from the link, if available:
             - name
             - description
+            - industry
+            - rating
+            - reviews
             - address
-            - website url
-            - phone number
-            - plus code
-
-        company_dormain = driver.find_element_by_class_name('u2OlCc')
-        address = driver.find_element_by_class_name('rogA2c')
-        working_Hours = driver.find_element_by_class_name('LJKBpe-Tswv1b-text')
-        contact = driver.find_element_by_class_name('QSFF4-text gm2-body-2')
-        rating = driver.find_element_by_class_name('aMPvhf-fI6EEc-KVuj8d')
-        reviews = driver.find_element_by_class_name('gm2-button-alt HHrUdb-v3pZbf')
+            - website
+            - phone
+            - plus_code
         '''
-        pass
+        class_widget = 'widget-pane-content-holder'
+        selectors = { 
+            "name": f'.{class_widget} .x3AX1-LfntMc-header-title-title.gm2-headline-5 span:first-of-type',
+            "description": f'.{class_widget} .x3AX1-LfntMc-header-title-VdSJob span:first-of-type',
+            "industry": f'.{class_widget} .x3AX1-LfntMc-header-title-ij8cu-haAclf .h0ySl-wcwwM-E70qVe button.widget-pane-link',
+            "rating": f'.{class_widget} .OAO0-ZEhYpd-vJ7A6b.OAO0-ZEhYpd-vJ7A6b-qnnXGd .aMPvhf-fI6EEc-KVuj8d',
+            "reviews": f'.{class_widget} .gm2-body-2.h0ySl-wcwwM-RWgCYc .h0ySl-wcwwM-E70qVe-rymPhb button.widget-pane-link',
+            "address": f'.{class_widget} .RcCsl.dqIYcf-RWgCYc-text.w4vB1d.C9yzub-TSZdd-on-hover-YuD1xf.AG25L [data-item-id="address"] .AeaXub .rogA2c .QSFF4-text.gm2-body-2',
+            "website": f'.{class_widget} .RcCsl.dqIYcf-RWgCYc-text.w4vB1d.C9yzub-TSZdd-on-hover-YuD1xf.AG25L [data-item-id="authority"] .AeaXub .rogA2c .QSFF4-text.gm2-body-2',
+            "phone": f'.{class_widget} .RcCsl.dqIYcf-RWgCYc-text.w4vB1d.C9yzub-TSZdd-on-hover-YuD1xf.AG25L [data-item-id*="phone:tel:"] .AeaXub .rogA2c .QSFF4-text.gm2-body-2',
+            "plus_code": f'.{class_widget} .RcCsl.dqIYcf-RWgCYc-text.w4vB1d.C9yzub-TSZdd-on-hover-YuD1xf.AG25L [data-item-id="oloc"] .AeaXub .rogA2c .QSFF4-text.gm2-body-2'
+        }
+
+        with webdriver.Chrome() as driver:
+            driver.maximize_window()
+            wait = WebDriverWait(driver, 10)
+            driver.get(link)
+            wait.until(EC.url_contains('data='))
+            fields = ("name", "description", "industry", "rating", "reviews", "address", "website", "phone", "plus_code")
+            data = dict()
+            for field in fields:
+                try:
+                    data[field] = ''
+                    elem = driver.find_element(By.CSS_SELECTOR, selectors[field])
+                    if not elem:
+                        continue
+                    data[field] = elem.text
+                except NoSuchElementException as e:
+                    continue
+            return data
 
     @staticmethod
     def spatialize_filename(file_name):

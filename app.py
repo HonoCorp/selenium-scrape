@@ -60,6 +60,15 @@ def configure_parser():
         choices = location_choices
     )
 
+    parser.add_option(
+        '-p',
+        '--process-output-file',
+        help = 'Whether to process the output file after it is created',
+        dest = 'process_output',
+        default = False,
+        action = 'store'
+    )
+
 def read_cmd() -> tuple:
     global parser
     global location_choices
@@ -96,7 +105,8 @@ def main():
         search_term=search_term, 
         filename=options.output_file, 
         dirname=options.directory, 
-        spatialize=options.spatialize)
+        spatialize=options.spatialize,
+        process_output=options.process_output)
     print(message)
 
 if __name__ == '__main__':
