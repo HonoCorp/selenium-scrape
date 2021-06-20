@@ -103,7 +103,7 @@ class SeleniumScraper:
     def default_filename(self, filename):
         self._default_filename = filename
 
-    def scrape(self, search_term) -> str:
+    def scrape(self, search_term, filename=None, dirname=None, spatialize=True) -> str:
         '''
         Using a context manager to run the selenium webdriver ensures better use of memory
         and other system resources. The with keyword allows us to easy use a context manager
@@ -126,7 +126,8 @@ class SeleniumScraper:
             # scrape the links
             self._build_links(driver, search_term)
             # write the list of links to a file
-            written_file = self._write_links_to_file(filename=self.default_filename)
+            filename = filename or self.default_filename
+            written_file = self._write_links_to_file(filename=filename, dirname=dirname, spatialize=spatialize)
             return f'Scraped links written to the file at {written_file}'
 
     def _build_links(self, driver, search_term):
