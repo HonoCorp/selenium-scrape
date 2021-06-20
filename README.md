@@ -6,7 +6,11 @@ This is a simple demo on how to scrape Google Maps using Selenium WebDriver.
 Install selenium  
 > pip install selenium  
 
-Run `app.py`  
+Download the chromedriver that is compatible with your version of chrome browser from [this url](https://chromedriver.storage.googleapis.com/index.html)
+
+Add the chromedriver to your path. For directions on how to add chromedriver to your PATH, go to [selenium website](https://www.selenium.dev/documentation/en/webdriver/driver_requirements/#adding-executables-to-your-path)
+
+Run `app.py` to see usage and available options  
 > python app.py  
 
 ## Examples
