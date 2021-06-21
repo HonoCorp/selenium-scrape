@@ -1,5 +1,6 @@
 # default directory for scraped data
 data/
+src/utils.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
