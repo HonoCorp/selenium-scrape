@@ -9,7 +9,7 @@ import datetime
 import csv
 
 class SeleniumScraper:
-    _target_css_selector = '.widget-pane-content-holder .section-layout.section-scrollbox.cYB2Ge-oHo7ed.cYB2Ge-ti6hGc.siAUzd-neVct-Q3DXx-BvBYQ .V0h1Ob-haAclf > a'
+    _target_css_selector = 'a.a4gq8e-aVTXAb-haAclf-jRmmHf-hSRGPd' #'.widget-pane-content-holder .section-layout.section-scrollbox.cYB2Ge-oHo7ed.cYB2Ge-ti6hGc.siAUzd-neVct-Q3DXx-BvBYQ .V0h1Ob-haAclf > a'
     _next_button_id = 'ppdPk-Ej1Yeb-LgbsSe-tJiF1e'
     _overlay_class = 'qq71r-qrlFte-bF1uUb'
     _links = []
@@ -223,13 +223,11 @@ class SeleniumScraper:
             - phone
             - plus_code
         '''
-        class_widget = 'widget-pane-content-holder'
+        class_widget = 'Yr7JMd-pane.Yr7JMd-pane-visible'
         selectors = { 
             "name": f'.{class_widget} .x3AX1-LfntMc-header-title-title.gm2-headline-5 span:first-of-type',
             "description": f'.{class_widget} .x3AX1-LfntMc-header-title-VdSJob span:first-of-type',
-            "industry": f'.{class_widget} .x3AX1-LfntMc-header-title-ij8cu-haAclf .h0ySl-wcwwM-E70qVe button.widget-pane-link',
             "rating": f'.{class_widget} .OAO0-ZEhYpd-vJ7A6b.OAO0-ZEhYpd-vJ7A6b-qnnXGd .aMPvhf-fI6EEc-KVuj8d',
-            "reviews": f'.{class_widget} .gm2-body-2.h0ySl-wcwwM-RWgCYc .h0ySl-wcwwM-E70qVe-rymPhb button.widget-pane-link',
             "address": f'.{class_widget} .RcCsl.dqIYcf-RWgCYc-text.w4vB1d.C9yzub-TSZdd-on-hover-YuD1xf.AG25L [data-item-id="address"] .AeaXub .rogA2c .QSFF4-text.gm2-body-2',
             "website": f'.{class_widget} .RcCsl.dqIYcf-RWgCYc-text.w4vB1d.C9yzub-TSZdd-on-hover-YuD1xf.AG25L [data-item-id="authority"] .AeaXub .rogA2c .QSFF4-text.gm2-body-2',
             "phone": f'.{class_widget} .RcCsl.dqIYcf-RWgCYc-text.w4vB1d.C9yzub-TSZdd-on-hover-YuD1xf.AG25L [data-item-id*="phone:tel:"] .AeaXub .rogA2c .QSFF4-text.gm2-body-2',
@@ -241,7 +239,7 @@ class SeleniumScraper:
             wait = WebDriverWait(driver, 10)
             driver.get(link)
             wait.until(EC.url_contains('data='))
-            fields = ("name", "description", "industry", "rating", "reviews", "address", "website", "phone", "plus_code")
+            fields = ("name", "description", "rating", "address", "website", "phone", "plus_code")
             data = dict()
             for field in fields:
                 try:
